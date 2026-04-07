@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>LoL Build Helper</title>
+    <style>
+        body { background: #010a13; color: #cdbe91; font-family: sans-serif; text-align: center; padding: 50px; }
+        .box { border: 2px solid #785a28; padding: 20px; display: inline-block; background: #091428; border-radius: 10px; }
+        input { padding: 10px; width: 300px; border: 1px solid #5b5a56; background: #1e2328; color: white; }
+        button { padding: 10px 20px; background: #005a82; color: white; border: 1px solid #0ac8b9; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; color: #c8aa6e; max-width: 400px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>League of Legends Build Helper</h1>
+        <p>Zadej svoji postavu a nepřátele:</p>
+        <input type="text" id="prompt" placeholder="Např: Hraju Ahri proti Ashe a Mundo">
+        <button onclick="askAI()">Poradit build</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function askAI() {
+            const prompt = document.getElementById('prompt').value;
+            const resDiv = document.getElementById('result');
+            resDiv.innerText = "Přemýšlím... (CPU LLM je pomalejší)";
+            
+            const response = await fetch('/ai', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({prompt: prompt})
+            });
+            const data = await response.json();
+            resDiv.innerText = data.odpoved || data.chyba;
+        }
+    </script>
+</body>
+</html>
