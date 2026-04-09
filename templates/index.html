@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LoL Build Helper | Pro Player Assistant</title>
     <style>
-        /* Definice barev League of Legends */
         :root {
             --hextech-gold: #c8aa6e;
             --hextech-blue: #005a82;
@@ -19,14 +18,14 @@
 
         body {
             background: var(--black);
-            /* Přidání atmosférického pozadí z LoL (volné k použití) */
-            background-image: linear-gradient(rgba(1, 10, 19, 0.8), rgba(1, 10, 19, 0.8)), 
-                              url('https://images.contentstack.io/v3/assets/blt731eb9a2f629f343/blt80963283626e829d/5ed6945f3408ec0732895697/summonersrift.jpg');
+            /* Pozadí: Vyvolávačův žleb */
+            background-image: linear-gradient(rgba(1, 10, 19, 0.85), rgba(1, 10, 19, 0.85)), 
+                              url('http://googleusercontent.com/image_collection/image_retrieval/4129830341560428307_0');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             color: var(--gold-bright);
-            font-family: 'Beaufort for LOL', serif, sans-serif; /* Styl fontu blízký LoL */
+            font-family: sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -36,36 +35,61 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
-            background: rgba(9, 20, 40, 0.9); /* Poloprůhledné pozadí */
+            max-width: 650px;
+            background: rgba(9, 20, 40, 0.95);
             border: 2px solid var(--border-color);
             border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(200, 170, 110, 0.1);
-            padding: 40px 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+            padding: 30px;
+            text-align: center;
             position: relative;
-            overflow: hidden;
         }
 
-        /* Dekorační linka nahoře */
-        .container::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--hextech-gold), transparent);
+        .champ-header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+
+        .champ-box {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            background: #010a13;
+            border-radius: 4px;
+        }
+
+        .champ-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            object-position: top;
+            display: block;
+            border: 1px solid #3c3c41;
+        }
+
+        .champ-label {
+            font-size: 0.8rem;
+            color: var(--hextech-gold);
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
         }
 
         h1 {
             text-transform: uppercase;
             letter-spacing: 3px;
             color: var(--hextech-gold);
-            margin-bottom: 10px;
-            font-size: 1.8rem;
+            margin: 15px 0 5px 0;
+            font-size: 1.6rem;
         }
 
-        p {
-            margin-bottom: 25px;
-            color: #a09b8c;
+        .vs-text {
+            font-size: 1.2rem;
+            color: var(--hextech-gold);
+            font-weight: bold;
             font-style: italic;
         }
 
@@ -73,6 +97,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            margin-top: 20px;
         }
 
         input {
@@ -82,13 +107,7 @@
             color: white;
             font-size: 1rem;
             outline: none;
-            transition: 0.3s;
             text-align: center;
-        }
-
-        input:focus {
-            border-color: var(--hextech-blue);
-            box-shadow: 0 0 10px rgba(0, 90, 130, 0.5);
         }
 
         button {
@@ -99,74 +118,61 @@
             text-transform: uppercase;
             font-weight: bold;
             cursor: pointer;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
 
         button:hover {
+            filter: brightness(1.3);
             background: #007aae;
-            filter: brightness(1.2);
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
         }
 
         #result {
-            margin-top: 30px;
-            padding: 20px;
-            min-height: 50px;
-            border-top: 1px solid rgba(120, 90, 40, 0.3);
-            line-height: 1.6;
+            margin-top: 25px;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            min-height: 40px;
             color: #f0e6d2;
-            font-size: 1.1rem;
         }
 
-        .loading {
-            animation: pulse 1.5s infinite;
-            color: var(--hextech-gold);
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        /* Responzivita pro mobily */
-        @media (max-width: 480px) {
-            h1 { font-size: 1.4rem; }
-            .container { padding: 30px 15px; }
+        @media (max-width: 500px) {
+            .champ-img { height: 80px; }
+            h1 { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div class="champ-header">
+            <div class="champ-box">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/6486068596896120400_0" alt="Ahri" class="champ-img">
+                <div class="champ-label">Tvoje Ahri</div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="champ-box">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/859734764689216311_0" alt="Ashe" class="champ-img">
+                <div class="champ-label">Nepřítel</div>
+            </div>
+        </div>
+
         <h1>Build Helper</h1>
-        <p>Analyzuj hru a získej výhodu</p>
+        <p style="color: #a09b8c; margin-bottom: 20px;">Ovládni žleb s nejlepším vybavením</p>
         
         <div class="input-group">
             <input type="text" id="prompt" placeholder="Hraju Ahri proti Ashe a Mundo...">
-            <button onclick="askAI()">Poradit strategii</button>
+            <button onclick="askAI()">Analyzovat zápas</button>
         </div>
 
-        <div id="result">
-            </div>
+        <div id="result"></div>
     </div>
 
     <script>
         async function askAI() {
             const prompt = document.getElementById('prompt').value;
             const resDiv = document.getElementById('result');
-            
-            if (!prompt) {
-                resDiv.innerText = "Napiš nejdřív, co hraješ!";
-                return;
-            }
+            if (!prompt) { resDiv.innerText = "Zadej detaily zápasu!"; return; }
 
-            resDiv.innerHTML = '<span class="loading">Kovám tvůj build v Hextech dílně...</span>';
+            resDiv.innerHTML = '<span style="color: #c8aa6e;">Vyvolávám moudrost...</span>';
             
             try {
                 const response = await fetch('/ai', {
@@ -175,11 +181,9 @@
                     body: JSON.stringify({prompt: prompt})
                 });
                 const data = await response.json();
-                
-                // Formátování textu pro lepší čitelnost
                 resDiv.innerText = data.odpoved || data.chyba;
             } catch (error) {
-                resDiv.innerText = "Chyba při spojení se serverem.";
+                resDiv.innerText = "Server neodpovídá.";
             }
         }
     </script>
