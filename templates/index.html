@@ -2,37 +2,185 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>LoL Build Helper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Build Helper | Pro Player Assistant</title>
     <style>
-        body { background: #010a13; color: #cdbe91; font-family: sans-serif; text-align: center; padding: 50px; }
-        .box { border: 2px solid #785a28; padding: 20px; display: inline-block; background: #091428; border-radius: 10px; }
-        input { padding: 10px; width: 300px; border: 1px solid #5b5a56; background: #1e2328; color: white; }
-        button { padding: 10px 20px; background: #005a82; color: white; border: 1px solid #0ac8b9; cursor: pointer; }
-        #result { margin-top: 20px; font-weight: bold; color: #c8aa6e; max-width: 400px; }
+        /* Definice barev League of Legends */
+        :root {
+            --hextech-gold: #c8aa6e;
+            --hextech-blue: #005a82;
+            --dark-blue: #091428;
+            --black: #010a13;
+            --gold-bright: #f0e6d2;
+            --border-color: #785a28;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--black);
+            /* Přidání atmosférického pozadí z LoL (volné k použití) */
+            background-image: linear-gradient(rgba(1, 10, 19, 0.8), rgba(1, 10, 19, 0.8)), 
+                              url('https://images.contentstack.io/v3/assets/blt731eb9a2f629f343/blt80963283626e829d/5ed6945f3408ec0732895697/summonersrift.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--gold-bright);
+            font-family: 'Beaufort for LOL', serif, sans-serif; /* Styl fontu blízký LoL */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(9, 20, 40, 0.9); /* Poloprůhledné pozadí */
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(200, 170, 110, 0.1);
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Dekorační linka nahoře */
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--hextech-gold), transparent);
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--hextech-gold);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        p {
+            margin-bottom: 25px;
+            color: #a09b8c;
+            font-style: italic;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            background: #1e2328;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: var(--hextech-blue);
+            box-shadow: 0 0 10px rgba(0, 90, 130, 0.5);
+        }
+
+        button {
+            padding: 15px;
+            background: var(--hextech-blue);
+            color: white;
+            border: 1px solid #0ac8b9;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #007aae;
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            min-height: 50px;
+            border-top: 1px solid rgba(120, 90, 40, 0.3);
+            line-height: 1.6;
+            color: #f0e6d2;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+            color: var(--hextech-gold);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* Responzivita pro mobily */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.4rem; }
+            .container { padding: 30px 15px; }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>League of Legends Build Helper</h1>
-        <p>Zadej svoji postavu a nepřátele:</p>
-        <input type="text" id="prompt" placeholder="Např: Hraju Ahri proti Ashe a Mundo">
-        <button onclick="askAI()">Poradit build</button>
-        <div id="result"></div>
+
+    <div class="container">
+        <h1>Build Helper</h1>
+        <p>Analyzuj hru a získej výhodu</p>
+        
+        <div class="input-group">
+            <input type="text" id="prompt" placeholder="Hraju Ahri proti Ashe a Mundo...">
+            <button onclick="askAI()">Poradit strategii</button>
+        </div>
+
+        <div id="result">
+            </div>
     </div>
 
     <script>
         async function askAI() {
             const prompt = document.getElementById('prompt').value;
             const resDiv = document.getElementById('result');
-            resDiv.innerText = "Přemýšlím... (CPU LLM je pomalejší)";
             
-            const response = await fetch('/ai', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({prompt: prompt})
-            });
-            const data = await response.json();
-            resDiv.innerText = data.odpoved || data.chyba;
+            if (!prompt) {
+                resDiv.innerText = "Napiš nejdřív, co hraješ!";
+                return;
+            }
+
+            resDiv.innerHTML = '<span class="loading">Kovám tvůj build v Hextech dílně...</span>';
+            
+            try {
+                const response = await fetch('/ai', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({prompt: prompt})
+                });
+                const data = await response.json();
+                
+                // Formátování textu pro lepší čitelnost
+                resDiv.innerText = data.odpoved || data.chyba;
+            } catch (error) {
+                resDiv.innerText = "Chyba při spojení se serverem.";
+            }
         }
     </script>
 </body>
