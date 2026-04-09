@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LoL Build Helper | Pro Player Assistant</title>
     <style>
-        /* Definice barev League of Legends */
         :root {
             --hextech-gold: #c8aa6e;
             --hextech-blue: #005a82;
@@ -19,14 +18,13 @@
 
         body {
             background: var(--black);
-            /* Přidání atmosférického pozadí z LoL (volné k použití) */
-            background-image: linear-gradient(rgba(1, 10, 19, 0.8), rgba(1, 10, 19, 0.8)), 
+            background-image: linear-gradient(rgba(1, 10, 19, 0.85), rgba(1, 10, 19, 0.85)), 
                               url('https://images.contentstack.io/v3/assets/blt731eb9a2f629f343/blt80963283626e829d/5ed6945f3408ec0732895697/summonersrift.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             color: var(--gold-bright);
-            font-family: 'Beaufort for LOL', serif, sans-serif; /* Styl fontu blízký LoL */
+            font-family: sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -36,137 +34,117 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
-            background: rgba(9, 20, 40, 0.9); /* Poloprůhledné pozadí */
+            max-width: 650px;
+            background: rgba(9, 20, 40, 0.95);
             border: 2px solid var(--border-color);
             border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(200, 170, 110, 0.1);
-            padding: 40px 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Dekorační linka nahoře */
-        .container::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--hextech-gold), transparent);
-        }
-
-        h1 {
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--hextech-gold);
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-        }
-
-        p {
-            margin-bottom: 25px;
-            color: #a09b8c;
-            font-style: italic;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        input {
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            background: #1e2328;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: 0.3s;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+            padding: 30px;
             text-align: center;
         }
 
-        input:focus {
-            border-color: var(--hextech-blue);
-            box-shadow: 0 0 10px rgba(0, 90, 130, 0.5);
-        }
+        .champ-header { display: flex; justify-content: space-around; align-items: center; margin-bottom: 25px; gap: 10px; }
+        .champ-box { flex: 1; border: 1px solid var(--border-color); padding: 5px; background: #010a13; border-radius: 4px; }
+        .champ-img { width: 100%; height: 120px; object-fit: cover; object-position: top; display: block; }
+        .champ-label { font-size: 0.8rem; color: var(--hextech-gold); margin-top: 5px; text-transform: uppercase; font-weight: bold; }
 
-        button {
-            padding: 15px;
-            background: var(--hextech-blue);
-            color: white;
-            border: 1px solid #0ac8b9;
-            text-transform: uppercase;
-            font-weight: bold;
-            cursor: pointer;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }
+        h1 { text-transform: uppercase; letter-spacing: 3px; color: var(--hextech-gold); margin-bottom: 5px; font-size: 1.6rem; }
+        .input-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
 
-        button:hover {
-            background: #007aae;
-            filter: brightness(1.2);
-            transform: translateY(-2px);
-        }
+        input { padding: 15px; border: 1px solid var(--border-color); background: #1e2328; color: white; text-align: center; }
+        button { padding: 15px; background: var(--hextech-blue); color: white; border: 1px solid #0ac8b9; text-transform: uppercase; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { filter: brightness(1.3); }
 
-        button:active {
-            transform: translateY(0);
-        }
+        #result { margin-top: 25px; padding: 15px; border-top: 1px solid var(--border-color); color: #f0e6d2; }
 
-        #result {
+        /* Styl pro historii (tabulku) */
+        details {
             margin-top: 30px;
-            padding: 20px;
-            min-height: 50px;
-            border-top: 1px solid rgba(120, 90, 40, 0.3);
-            line-height: 1.6;
-            color: #f0e6d2;
-            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            background: rgba(1, 10, 19, 0.5);
+            border-radius: 4px;
+            text-align: left;
         }
 
-        .loading {
-            animation: pulse 1.5s infinite;
+        summary {
+            padding: 10px;
+            cursor: pointer;
             color: var(--hextech-gold);
+            font-weight: bold;
+            text-transform: uppercase;
+            outline: none;
+            user-select: none;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+        summary:hover { background: rgba(200, 170, 110, 0.1); }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            color: #a09b8c;
         }
 
-        /* Responzivita pro mobily */
-        @media (max-width: 480px) {
-            h1 { font-size: 1.4rem; }
-            .container { padding: 30px 15px; }
+        .history-table th, .history-table td {
+            padding: 10px;
+            border-top: 1px solid rgba(120, 90, 40, 0.3);
+            vertical-align: top;
         }
+
+        .history-table th { color: var(--hextech-gold); text-align: left; }
+        
+        @media (max-width: 500px) { .champ-img { height: 80px; } }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Build Helper</h1>
-        <p>Analyzuj hru a získej výhodu</p>
-        
-        <div class="input-group">
-            <input type="text" id="prompt" placeholder="Hraju Ahri proti Ashe a Mundo...">
-            <button onclick="askAI()">Poradit strategii</button>
+        <div class="champ-header">
+            <div class="champ-box">
+                <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_27.jpg" alt="Ahri" class="champ-img">
+                <div class="champ-label">K/DA Ahri</div>
+            </div>
+            <div style="font-style: italic; color: var(--hextech-gold);">VS</div>
+            <div class="champ-box">
+                <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_0.jpg" alt="Ashe" class="champ-img">
+                <div class="champ-label">Ashe</div>
+            </div>
         </div>
 
-        <div id="result">
+        <h1>Build Helper</h1>
+        
+        <div class="input-group">
+            <input type="text" id="prompt" placeholder="Např: Hraju Ahri proti Ashe a Mundo">
+            <button onclick="askAI()">Poradit build</button>
+        </div>
+
+        <div id="result"></div>
+
+        <details id="history-section">
+            <summary onclick="nactiHistorii()">Zobrazit historii chatů</summary>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Čas</th>
+                            <th>Dotaz</th>
+                            <th>Odpověď</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        </tbody>
+                </table>
             </div>
+        </details>
     </div>
 
     <script>
         async function askAI() {
             const prompt = document.getElementById('prompt').value;
             const resDiv = document.getElementById('result');
-            
-            if (!prompt) {
-                resDiv.innerText = "Napiš nejdřív, co hraješ!";
-                return;
-            }
+            if (!prompt) return;
 
-            resDiv.innerHTML = '<span class="loading">Kovám tvůj build v Hextech dílně...</span>';
+            resDiv.innerHTML = '<span style="color: #c8aa6e;">Kovám tvůj build...</span>';
             
             try {
                 const response = await fetch('/ai', {
@@ -175,11 +153,30 @@
                     body: JSON.stringify({prompt: prompt})
                 });
                 const data = await response.json();
-                
-                // Formátování textu pro lepší čitelnost
                 resDiv.innerText = data.odpoved || data.chyba;
             } catch (error) {
-                resDiv.innerText = "Chyba při spojení se serverem.";
+                resDiv.innerText = "Chyba spojení.";
+            }
+        }
+
+        async function nactiHistorii() {
+            try {
+                const response = await fetch('/historie');
+                const data = await response.json();
+                const tbody = document.getElementById('history-body');
+                
+                tbody.innerHTML = ''; // Vyčistit stará data
+                
+                data.forEach(item => {
+                    const row = `<tr>
+                        <td style="white-space: nowrap;">${new Date(item.cas).toLocaleString('cs-CZ')}</td>
+                        <td>${item.dotaz}</td>
+                        <td>${item.odpoved}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error("Historii nelze načíst", err);
             }
         }
     </script>
