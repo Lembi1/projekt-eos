@@ -3,13 +3,32 @@ import requests
 import datetime
 import os
 import urllib3
+import sqlite3  # ✅ Přidána knihovna pro databázi
 
-# ✅ Vypnutí varování o SSL (nezbytné pro váš server)
+# ✅ Vypnutí varování o SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
-# ✅ Načtení konfigurace z ENV (aby to fungovalo na serveru i lokálně)
+# ✅ Cesta k databázi
+DB_PATH = 'historie.db'
+
+# ✅ Funkce pro inicializaci databáze (vytvoří tabulku pro všechny)
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS chaty (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cas TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                dotaz TEXT,
+                odpoved TEXT
+            )
+        ''')
+    print("✅ Databáze historie.db je připravena.")
+
+init_db()
+
+# ✅ Načtení konfigurace z ENV
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://kurim.ithope.eu/v1")
 
@@ -21,35 +40,31 @@ def home():
 def ping():
     return "pong"
 
-@app.route('/status', methods=['GET'])
-def status():
-    return jsonify({
-        "cas": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "autor": "Tvoje Jmeno", # Tady si kamarád dopíše jméno
-        "projekt": "LoL Build Helper"
-    })
+# ✅ Nový endpoint pro HTML tabulku (aby všichni viděli všechno)
+@app.route('/historie', methods=['GET'])
+def historie():
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.execute("SELECT * FROM chaty ORDER BY cas DESC")
+            rows = cursor.fetchall()
+            return jsonify([dict(row) for row in rows])
+    except Exception as e:
+        return jsonify({"chyba": str(e)}), 500
 
 @app.route('/ai', methods=['POST'])
 def ai():
     data = request.json
     user_prompt = data.get("prompt", "")
     
-    # ✅ Oprava URL na standardní OpenAI chat endpoint
     clean_url = OPENAI_BASE_URL.rstrip('/')
     target_url = f"{clean_url}/chat/completions"
 
-    # ✅ Oprava struktury dat pro OpenAI standard
     payload = {
         "model": "gemma3:27b",
         "messages": [
-            {
-                "role": "system", 
-                "content": "Jsi expert na League of Legends. Odpovídáš stručně jednou větou v češtině."
-            },
-            {
-                "role": "user", 
-                "content": user_prompt
-            }
+            {"role": "system", "content": "Jsi expert na League of Legends. Odpovídáš stručně jednou větou v češtině."},
+            {"role": "user", "content": user_prompt}
         ],
         "stream": False
     }
@@ -60,7 +75,6 @@ def ai():
     }
     
     try:
-        # ✅ Přidáno verify=False a správné parametry
         response = requests.post(
             target_url, 
             json=payload, 
@@ -70,8 +84,15 @@ def ai():
         )
         
         if response.status_code == 200:
-            # ✅ Oprava parsování odpovědi (choices[0]...)
             ai_content = response.json()['choices'][0]['message']['content']
+            
+            # ✅ ULOŽENÍ DO DATABÁZE (Tady se to zapisuje pro všechny)
+            try:
+                with sqlite3.connect(DB_PATH) as conn:
+                    conn.execute("INSERT INTO chaty (dotaz, odpoved) VALUES (?, ?)", (user_prompt, ai_content))
+            except Exception as db_e:
+                print(f"Chyba zápisu do DB: {db_e}")
+
             return jsonify({"odpoved": ai_content})
         else:
             return jsonify({"chyba": f"Server vrátil chybu {response.status_code}"}), response.status_code
@@ -80,6 +101,5 @@ def ai():
         return jsonify({"chyba": "AI nedostupné: " + str(e)}), 500
 
 if __name__ == '__main__':
-    # ✅ Port 8081 ponechán dle zadání
     port = int(os.environ.get("PORT", 8081))
     app.run(host='0.0.0.0', port=port)
