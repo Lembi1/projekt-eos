@@ -10,7 +10,7 @@ import urllib3
 
 
 
-# ✅ Vypnutí varování o SSL (nezbytné pro váš server)
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
