@@ -2,67 +2,1305 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>LoL Build Helper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Build Advisor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
     <style>
-        :root { --hextech-gold: #c8aa6e; --hextech-blue: #005a82; --border-color: #785a28; }
-        body { 
-            background: #010a13; 
-            background-image: linear-gradient(rgba(1, 10, 19, 0.8), rgba(1, 10, 19, 0.8)), url('https://images.contentstack.io/v3/assets/blt731eb9a2f629f343/blt80963283626e829d/5ed6945f3408ec0732895697/summonersrift.jpg');
-            background-size: cover; color: #f0e6d2; font-family: sans-serif; display: flex; justify-content: center; padding: 20px;
+        :root {
+            --purple: #7b2fff;
+            --purple-dark: #4a1a99;
+            --purple-light: #a855f7;
+            --blue: #2563eb;
+            --blue-light: #60a5fa;
+            --bg: #0a0a1a;
+            --bg2: #12102a;
+            --text: #e2d9f3;
+            --text-dim: #8b7cb3;
+            --header-bg1: #0d0b24;
+            --header-bg2: #1a0a3d;
+            --header-border: var(--purple);
+            --header-shadow: rgba(123,47,255,0.3);
+            --section-header-bg1: #0d0b24;
+            --section-header-bg2: #1a0a3d;
         }
-        .container { max-width: 600px; width: 100%; background: rgba(9, 20, 40, 0.9); border: 2px solid var(--border-color); padding: 20px; text-align: center; }
-        input { width: 80%; padding: 10px; margin: 10px 0; background: #1e2328; color: white; border: 1px solid var(--border-color); }
-        button { padding: 10px 20px; background: var(--hextech-blue); color: white; border: 1px solid #0ac8b9; cursor: pointer; text-transform: uppercase; }
-        #result { margin: 20px 0; padding: 10px; border-top: 1px solid var(--border-color); }
-        details { margin-top: 20px; text-align: left; border: 1px solid var(--border-color); }
-        summary { padding: 10px; cursor: pointer; color: var(--hextech-gold); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th, td { padding: 8px; border-bottom: 1px solid #333; }
+
+        [data-theme="black"] {
+            --bg: #000000;
+            --bg2: #111111;
+            --text: #eeeeee;
+            --text-dim: #888888;
+            --purple: #888888;
+            --purple-dark: #444444;
+            --purple-light: #aaaaaa;
+            --header-bg1: #0a0a0a;
+            --header-bg2: #1a1a1a;
+            --header-border: #333;
+            --header-shadow: rgba(0,0,0,0.5);
+            --section-header-bg1: #0a0a0a;
+            --section-header-bg2: #111111;
+        }
+
+        [data-theme="white"] {
+            --bg: #f4f4f8;
+            --bg2: #ffffff;
+            --text: #1a1a2e;
+            --text-dim: #555577;
+            --purple: #7b2fff;
+            --purple-dark: #b08af0;
+            --purple-light: #5a1dcc;
+            --blue-light: #2563eb;
+            --header-bg1: #ffffff;
+            --header-bg2: #f0eaff;
+            --header-border: var(--purple);
+            --header-shadow: rgba(123,47,255,0.15);
+            --section-header-bg1: #f0eaff;
+            --section-header-bg2: #e8e0ff;
+        }
+
+        [data-theme="rainbow"] {
+            --bg: #0a0a1a;
+            --bg2: #12102a;
+            --text: #ffffff;
+            --text-dim: #cccccc;
+            --purple: #ff00ff;
+            --purple-dark: #aa00aa;
+            --purple-light: #ff66ff;
+            --blue-light: #00ffff;
+            --header-bg1: #0a0a1a;
+            --header-bg2: #0a0a1a;
+            --header-border: transparent;
+            --header-shadow: rgba(255,0,255,0.3);
+            --section-header-bg1: #0a0a1a;
+            --section-header-bg2: #0a0a1a;
+        }
+
+        [data-theme="rainbow"] body {
+            background: linear-gradient(270deg, #1a0a3d, #0a1a40, #0a2a1a, #1a2a00, #2a1a00, #2a0a1a, #1a0a3d);
+            background-size: 600% 600%;
+            animation: rainbowBg 8s ease infinite;
+        }
+
+        [data-theme="rainbow"] header {
+            background: rgba(0,0,0,0.5) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid transparent !important;
+            border-image: linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff40,#00cfff,#c000ff,#ff0080) 1 !important;
+        }
+
+        [data-theme="rainbow"] .logo {
+            background: linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff40,#00cfff,#c000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbowText 4s linear infinite;
+            background-size: 200%;
+        }
+
+        [data-theme="rainbow"] .advisor-box::before {
+            background: linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff40,#00cfff,#c000ff,#ff0080);
+            background-size: 200%;
+            animation: rainbowText 3s linear infinite;
+        }
+
+        [data-theme="rainbow"] .section-header h2,
+        [data-theme="rainbow"] .build-display h3,
+        [data-theme="rainbow"] .advisor-box h2 {
+            background: linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff40,#00cfff,#c000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbowText 4s linear infinite;
+            background-size: 200%;
+        }
+
+        @keyframes rainbowBg {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes rainbowText {
+            0%   { background-position: 0%; }
+            100% { background-position: 200%; }
+        }
+
+        [data-theme="white"] body { background: var(--bg); }
+        [data-theme="white"] .advisor-box { background: #ffffff; border-color: #c4b0f0; }
+        [data-theme="white"] input[type="text"] { background: #f9f6ff; border-color: #c4b0f0; color: #1a1a2e; }
+        [data-theme="white"] .build-champ-btn { background: #f9f6ff; }
+        [data-theme="white"] .build-display { background: #ffffff; }
+        [data-theme="white"] .champ-card { background: #f0eaff; }
+        [data-theme="white"] .tier-champs { background: rgba(240,234,255,0.8); }
+        [data-theme="white"] footer { background: #f0eaff; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--header-bg1), var(--header-bg2));
+            border-bottom: 2px solid var(--header-border);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px var(--header-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--purple-light);
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .logo span { color: var(--blue-light); }
+
+        nav { display: flex; gap: 4px; }
+
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--purple-light);
+            border-color: var(--purple-dark);
+            background: rgba(123,47,255,0.1);
+        }
+
+        section { display: none; flex: 1; }
+        section.active { display: flex; flex-direction: column; }
+
+        /* ===== HOME ===== */
+        .hero {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #0d0b24 0%, #1a0a3d 50%, #0a1040 100%);
+        }
+        .hero-img {
+            position: absolute;
+            right: 0; top: 0;
+            height: 100%; width: 55%;
+            object-fit: cover;
+            object-position: top;
+            mask-image: linear-gradient(to left, rgba(0,0,0,0.9) 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.9) 40%, transparent 100%);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 60px;
+        }
+        .hero-content h1 {
+            font-size: 2.4rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+        .hero-content h1 span { color: var(--purple-light); }
+        .hero-content p { color: var(--text-dim); font-size: 0.95rem; max-width: 360px; }
+
+        .home-main {
+            flex: 1;
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .ai-item-preview {
+            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .ai-item-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+        }
+        .ai-slots {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .ai-slot {
+            width: 90px;
+            height: 90px;
+            border-radius: 8px;
+            border: 2px solid var(--purple-dark);
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        .ai-slot.empty {
+            border-style: dashed;
+            border-color: rgba(123,47,255,0.3);
+        }
+        .ai-slot.filled {
+            border-color: var(--purple-light);
+            border-style: solid;
+            box-shadow: 0 0 16px rgba(123,47,255,0.3);
+        }
+        .ai-slot.filled:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 24px rgba(123,47,255,0.5);
+        }
+        .ai-slot img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .ai-slot .slot-num {
+            font-size: 1.4rem;
+            color: rgba(123,47,255,0.25);
+            font-weight: bold;
+        }
+        .ai-slot .slot-item-name {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.75);
+            font-size: 0.55rem;
+            text-align: center;
+            color: #e2d9f3;
+            padding: 3px 2px;
+            line-height: 1.2;
+        }
+        .ai-slot .slot-tooltip {
+            position: absolute;
+            bottom: 100%; left: 50%;
+            transform: translateX(-50%);
+            background: #1a0a3d;
+            border: 1px solid var(--purple-dark);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 0.65rem;
+            color: var(--text);
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            margin-bottom: 6px;
+            text-align: left;
+            min-width: 160px;
+        }
+        .ai-slot:hover .slot-tooltip { opacity: 1; }
+        .ai-slots-hint {
+            font-size: 0.72rem;
+            color: rgba(139,124,179,0.5);
+            font-style: italic;
+        }
+        .ai-slots-hint.hidden { display: none; }
+
+        .advisor-box {
+            background: linear-gradient(135deg, #12102a, #1a1040);
+            border: 1px solid var(--purple-dark);
+            border-radius: 8px;
+            padding: 36px;
+            box-shadow: 0 0 40px rgba(123,47,255,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .advisor-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple), var(--blue-light), var(--purple));
+        }
+        .advisor-box h2 {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--purple-light);
+            margin-bottom: 6px;
+        }
+        .advisor-box > p { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 24px; }
+
+        .input-group { display: flex; gap: 10px; }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 13px 16px;
+            background: #0a0a1a;
+            border: 1px solid var(--purple-dark);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 12px rgba(123,47,255,0.25);
+        }
+        input[type="text"]::placeholder { color: var(--text-dim); }
+
+        button.main-btn {
+            padding: 13px 24px;
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        button.main-btn:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(123,47,255,0.4);
+        }
+        button.main-btn:active { transform: translateY(0); }
+
+        #result {
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(123,47,255,0.2);
+            border-radius: 6px;
+            min-height: 56px;
+            line-height: 1.7;
+            font-size: 0.92rem;
+            display: none;
+        }
+        #result.visible { display: block; }
+
+        .loading {
+            color: var(--purple-light);
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== SEKCE HEADER ===== */
+        .section-header {
+            background: linear-gradient(135deg, var(--section-header-bg1), var(--section-header-bg2));
+            padding: 32px 40px;
+            border-bottom: 1px solid var(--purple-dark);
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .theme-btn {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+            position: relative;
+        }
+        .theme-btn:hover { transform: scale(1.2); border-color: rgba(255,255,255,0.5); }
+        .theme-btn.active { border-color: white; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+
+        .theme-btn.t-purple { background: linear-gradient(135deg, #7b2fff, #2563eb); }
+        .theme-btn.t-black  { background: linear-gradient(135deg, #111, #333); }
+        .theme-btn.t-white  { background: linear-gradient(135deg, #fff, #e0d4ff); border-color: rgba(0,0,0,0.2); }
+        .theme-btn.t-rainbow {
+            background: linear-gradient(135deg, #ff0080, #ff8c00, #ffed00, #00ff40, #00cfff, #c000ff);
+            background-size: 200%;
+            animation: rainbowText 2s linear infinite;
+        }
+        .section-header h2 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--purple-light);
+            margin-bottom: 4px;
+        }
+        .section-header p { color: var(--text-dim); font-size: 0.88rem; }
+
+        .section-body {
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== BUILDY ===== */
+        .builds-champ-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .build-champ-btn {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 6px;
+            background: var(--bg2);
+            border: 1px solid var(--purple-dark);
+            border-radius: 6px;
+            padding: 10px 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .build-champ-btn:hover, .build-champ-btn.selected {
+            border-color: var(--purple-light);
+            background: rgba(123,47,255,0.15);
+        }
+        .build-champ-btn img {
+            width: 52px; height: 52px;
+            border-radius: 4px;
+        }
+        .build-champ-btn span {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+        .build-champ-btn.selected span { color: var(--purple-light); }
+
+        .build-display {
+            background: linear-gradient(135deg, #12102a, #1a1040);
+            border: 1px solid var(--purple-dark);
+            border-radius: 8px;
+            padding: 28px;
+            display: none;
+        }
+        .build-display.visible { display: block; }
+
+        .build-display h3 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--purple-light);
+            margin-bottom: 6px;
+        }
+        .build-role {
+            color: var(--text-dim);
+            font-size: 0.82rem;
+            margin-bottom: 20px;
+        }
+
+        .items-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .item-slot {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 6px;
+            width: 118px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(123,47,255,0.2);
+            border-radius: 8px;
+            padding: 10px 8px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .item-slot:hover {
+            border-color: var(--purple-light);
+            background: rgba(123,47,255,0.08);
+        }
+        .item-slot img {
+            width: 54px; height: 54px;
+            border-radius: 6px;
+            border: 2px solid var(--purple-dark);
+            background: #0a0a1a;
+        }
+        .item-slot .item-name {
+            font-size: 0.68rem;
+            color: var(--text);
+            text-align: center;
+            line-height: 1.3;
+            font-weight: bold;
+        }
+        .item-slot .item-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3px;
+        }
+        .stat-badge {
+            font-size: 0.6rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            border-radius: 3px;
+            padding: 1px 4px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .item-slot .item-passive {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .filter-row {
+            display: flex; gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .filter-btn {
+            padding: 7px 16px;
+            background: var(--bg2);
+            border: 1px solid var(--purple-dark);
+            border-radius: 20px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(123,47,255,0.2);
+            border-color: var(--purple-light);
+            color: var(--purple-light);
+        }
+
+        /* ===== CHAMPIONS ===== */
+        .champ-search {
+            width: 100%;
+            max-width: 340px;
+            padding: 10px 16px;
+            background: #0a0a1a;
+            border: 1px solid var(--purple-dark);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .champ-search:focus {
+            border-color: var(--purple);
+        }
+        .champ-search::placeholder { color: var(--text-dim); }
+
+        .all-champs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+            gap: 8px;
+        }
+
+        .champ-card {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 5px;
+            background: var(--bg2);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 8px 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .champ-card:hover {
+            border-color: var(--purple-light);
+            background: rgba(123,47,255,0.12);
+            transform: scale(1.04);
+        }
+        .champ-card img {
+            width: 56px; height: 56px;
+            border-radius: 3px;
+        }
+        .champ-card span {
+            font-size: 0.62rem;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.2;
+        }
+        .champ-card:hover span { color: var(--purple-light); }
+
+        .loading-champs {
+            color: var(--text-dim);
+            text-align: center;
+            padding: 40px;
+            font-size: 0.9rem;
+            animation: blink 1.5s infinite;
+        }
+
+        /* ===== TIER LIST ===== */
+        .tier-rows { display: flex; flex-direction: column; gap: 12px; }
+
+        .tier-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(123,47,255,0.2);
+        }
+
+        .tier-label {
+            width: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            letter-spacing: 1px;
+        }
+        .tier-S .tier-label { background: #1a0a3d; color: #e040fb; }
+        .tier-A .tier-label { background: #0a1a3d; color: #60a5fa; }
+        .tier-B .tier-label { background: #0a2a1a; color: #4ade80; }
+        .tier-C .tier-label { background: #2a1a0a; color: #fbbf24; }
+        .tier-D .tier-label { background: #2a0a0a; color: #f87171; }
+
+        .tier-champs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 14px;
+            background: rgba(10,10,26,0.6);
+            flex: 1;
+            align-items: center;
+        }
+
+        .tier-champ {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .tier-champ:hover { transform: scale(1.1); }
+        .tier-champ img {
+            width: 46px; height: 46px;
+            border-radius: 4px;
+        }
+        .tier-champ span {
+            font-size: 0.58rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        footer {
+            background: #0d0b24;
+            border-top: 1px solid var(--purple-dark);
+            padding: 20px 40px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 700px) {
+            header { padding: 12px 16px; }
+            nav a { padding: 6px 10px; font-size: 0.75rem; }
+            .hero-content { padding: 0 20px; }
+            .hero-content h1 { font-size: 1.6rem; }
+            .home-main, .section-body { padding: 20px 16px; }
+            .section-header { padding: 20px 16px; }
+            .input-group { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>LoL Build Helper</h1>
-        <input type="text" id="prompt" placeholder="Hraju Ahri proti Ashe...">
-        <button onclick="askAI()">Poradit</button>
-        <div id="result"></div>
 
-        <details>
-            <summary onclick="nactiHistorii()">Zobrazit historii chatů</summary>
-            <div style="max-height: 200px; overflow-y: auto;">
-                <table>
-                    <thead><tr><th>Čas</th><th>Dotaz</th><th>Odpověď</th></tr></thead>
-                    <tbody id="history-body"></tbody>
-                </table>
-            </div>
-        </details>
+<header>
+    <div class="logo" onclick="showSection('home')">LoL<span>Build</span></div>
+    <nav>
+        <a href="#" id="nav-home" onclick="showSection('home')" class="active">Domů</a>
+        <a href="#" id="nav-builds" onclick="showSection('builds')">Buildy</a>
+        <a href="#" id="nav-champions" onclick="showSection('champions')">Champions</a>
+        <a href="#" id="nav-tierlist" onclick="showSection('tierlist')">Tier list</a>
+    </nav>
+    <div class="theme-switcher">
+        <button class="theme-btn t-purple active" title="Fialová" onclick="setTheme('purple', this)"></button>
+        <button class="theme-btn t-black"  title="Černá"   onclick="setTheme('black', this)"></button>
+        <button class="theme-btn t-white"  title="Bílá"    onclick="setTheme('white', this)"></button>
+        <button class="theme-btn t-rainbow" title="Duhová" onclick="setTheme('rainbow', this)"></button>
+    </div>
+</header>
+
+<!-- ===== HOME ===== -->
+<section id="home" class="active">
+    <div class="hero">
+        <div class="hero-bg"></div>
+        <img class="hero-img" src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_0.jpg" alt="Ashe splash art">
+        <div class="hero-content">
+            <h1>AI Build<br><span>Advisor</span></h1>
+            <p>Napiš svého šampiona a situaci v zápase — AI ti poradí optimální build a strategii.</p>
+        </div>
     </div>
 
-    <script>
-        async function askAI() {
-            const prompt = document.getElementById('prompt').value;
-            const resDiv = document.getElementById('result');
-            resDiv.innerText = "Kovám build...";
-            const response = await fetch('/ai', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({prompt: prompt})
-            });
-            const data = await response.json();
-            resDiv.innerText = data.odpoved || data.chyba;
-        }
+    <div class="home-main">
+        <div class="ai-item-preview">
+            <div class="ai-item-label">Doporučené předměty od AI</div>
+            <div class="ai-slots" id="ai-slots">
+                <div class="ai-slot empty" data-idx="0"><span class="slot-num">1</span></div>
+                <div class="ai-slot empty" data-idx="1"><span class="slot-num">2</span></div>
+                <div class="ai-slot empty" data-idx="2"><span class="slot-num">3</span></div>
+                <div class="ai-slot empty" data-idx="3"><span class="slot-num">4</span></div>
+                <div class="ai-slot empty" data-idx="4"><span class="slot-num">5</span></div>
+                <div class="ai-slot empty" data-idx="5"><span class="slot-num">6</span></div>
+            </div>
+            <div class="ai-slots-hint">Zeptej se AI níže — itemy se zobrazí tady ↑</div>
+        </div>
 
-        async function nactiHistorii() {
-            const response = await fetch('/historie');
-            const data = await response.json();
-            const tbody = document.getElementById('history-body');
-            tbody.innerHTML = data.map(item => `
-                <tr>
-                    <td>${new Date(item.cas).toLocaleString()}</td>
-                    <td>${item.dotaz}</td>
-                    <td>${item.odpoved}</td>
-                </tr>`).join('');
+        <div class="advisor-box">
+            <h2>Zeptej se AI</h2>
+            <p>Popiš situaci — šampiona, roli, protivníky nebo fázi hry.</p>
+            <div class="input-group">
+                <input type="text" id="prompt" placeholder="Hraju Ahri mid proti Zedovi, jsem 15 minut za...">
+                <button class="main-btn" onclick="askAI()">Poradit build</button>
+            </div>
+            <div id="result"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== BUILDY ===== -->
+<section id="builds">
+    <div class="section-header">
+        <h2>Buildy</h2>
+        <p>Nejhranější buildy pro každého šampiona — klikni na šampiona pro zobrazení</p>
+    </div>
+    <div class="section-body">
+        <div class="filter-row" id="builds-filter">
+            <button class="filter-btn active" onclick="filterBuilds('all', this)">Vše</button>
+            <button class="filter-btn" onclick="filterBuilds('Top', this)">Top</button>
+            <button class="filter-btn" onclick="filterBuilds('Jungle', this)">Jungle</button>
+            <button class="filter-btn" onclick="filterBuilds('Mid', this)">Mid</button>
+            <button class="filter-btn" onclick="filterBuilds('ADC', this)">ADC</button>
+            <button class="filter-btn" onclick="filterBuilds('Support', this)">Support</button>
+        </div>
+
+        <div class="builds-champ-grid" id="builds-champ-grid"></div>
+
+        <div class="build-display" id="build-display">
+            <h3 id="bd-name"></h3>
+            <div class="build-role" id="bd-role"></div>
+            <div class="items-grid" id="bd-items"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CHAMPIONS ===== -->
+<section id="champions">
+    <div class="section-header">
+        <h2>Champions</h2>
+        <p>Všichni šampioni — jako v champion selectu</p>
+    </div>
+    <div class="section-body">
+        <input type="text" class="champ-search" id="champ-search" placeholder="🔍  Hledej šampiona..." oninput="filterChampions()">
+        <div class="filter-row" id="class-filter">
+            <button class="filter-btn active" onclick="filterByClass('all', this)">Vše</button>
+            <button class="filter-btn" onclick="filterByClass('Fighter', this)">Fighter</button>
+            <button class="filter-btn" onclick="filterByClass('Tank', this)">Tank</button>
+            <button class="filter-btn" onclick="filterByClass('Assassin', this)">Assassin</button>
+            <button class="filter-btn" onclick="filterByClass('Mage', this)">Mage</button>
+            <button class="filter-btn" onclick="filterByClass('Marksman', this)">Marksman</button>
+            <button class="filter-btn" onclick="filterByClass('Support', this)">Support</button>
+        </div>
+        <div class="all-champs-grid" id="all-champs-grid">
+            <div class="loading-champs">Načítám šampiony...</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TIER LIST ===== -->
+<section id="tierlist">
+    <div class="section-header">
+        <h2>Tier List</h2>
+        <p>Nejlepší šampioni dle procenta výher v aktuálním pachi</p>
+    </div>
+    <div class="section-body">
+        <div class="tier-rows" id="tier-rows"></div>
+    </div>
+</section>
+
+<footer>
+    <p>LoL Build Advisor — školní projekt &nbsp;|&nbsp; Není spojeno s Riot Games &nbsp;|&nbsp; Data: League of Legends</p>
+</footer>
+
+<script>
+const VER = '14.9.1';
+var allChampions = [];
+var currentClassFilter = 'all';
+var currentBuildFilter = 'all';
+
+const BUILDS = {
+    Jinx:       { role: 'ADC', items: [{id:6672,n:'Kraken Slayer'},{id:3085,n:"Runaan's Hurricane"},{id:3031,n:'Infinity Edge'},{id:3094,n:'Rapid Firecannon'},{id:3036,n:"Lord Dominik's"},{id:3072,n:'Bloodthirster'}] },
+    Ashe:       { role: 'ADC', items: [{id:6672,n:'Kraken Slayer'},{id:3085,n:"Runaan's Hurricane"},{id:3031,n:'Infinity Edge'},{id:3094,n:'Rapid Firecannon'},{id:3033,n:'Mortal Reminder'},{id:3026,n:'Guardian Angel'}] },
+    Caitlyn:    { role: 'ADC', items: [{id:6671,n:'Galeforce'},{id:6672,n:'Kraken Slayer'},{id:3031,n:'Infinity Edge'},{id:3094,n:'Rapid Firecannon'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'}] },
+    Jhin:       { role: 'ADC', items: [{id:6671,n:'Galeforce'},{id:3094,n:'Rapid Firecannon'},{id:3031,n:'Infinity Edge'},{id:3036,n:"Lord Dominik's"},{id:3033,n:'Mortal Reminder'},{id:3026,n:'Guardian Angel'}] },
+    Ezreal:     { role: 'ADC', items: [{id:3078,n:'Trinity Force'},{id:3094,n:'Rapid Firecannon'},{id:3031,n:'Infinity Edge'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+    Sivir:      { role: 'ADC', items: [{id:6672,n:'Kraken Slayer'},{id:3085,n:"Runaan's Hurricane"},{id:3031,n:'Infinity Edge'},{id:3094,n:'Rapid Firecannon'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'}] },
+    Lucian:     { role: 'ADC', items: [{id:6671,n:'Galeforce'},{id:3153,n:'Blade of the Ruined King'},{id:3031,n:'Infinity Edge'},{id:3046,n:'Phantom Dancer'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'}] },
+    Vayne:      { role: 'ADC', items: [{id:6673,n:'Immortal Shieldbow'},{id:3153,n:'Blade of the Ruined King'},{id:3031,n:'Infinity Edge'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+    Draven:     { role: 'ADC', items: [{id:6671,n:'Galeforce'},{id:3031,n:'Infinity Edge'},{id:3072,n:'Bloodthirster'},{id:3036,n:"Lord Dominik's"},{id:3033,n:'Mortal Reminder'},{id:3026,n:'Guardian Angel'}] },
+    Twitch:     { role: 'ADC', items: [{id:6673,n:'Immortal Shieldbow'},{id:3085,n:"Runaan's Hurricane"},{id:3031,n:'Infinity Edge'},{id:3036,n:"Lord Dominik's"},{id:3072,n:'Bloodthirster'},{id:3026,n:'Guardian Angel'}] },
+
+    Lux:        { role: 'Mid / Support', items: [{id:6655,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Ahri:       { role: 'Mid', items: [{id:6655,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Zed:        { role: 'Mid', items: [{id:6691,n:'Duskblade'},{id:6694,n:"Serpent's Fang"},{id:3814,n:'Edge of Night'},{id:6035,n:"Serylda's Grudge"},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'}] },
+    Yasuo:      { role: 'Mid / Top', items: [{id:6673,n:'Immortal Shieldbow'},{id:3031,n:'Infinity Edge'},{id:6672,n:'Kraken Slayer'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+    Viktor:     { role: 'Mid', items: [{id:3285,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Orianna:    { role: 'Mid', items: [{id:3285,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Katarina:   { role: 'Mid', items: [{id:4637,n:'Hextech Rocketbelt'},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Sylas:      { role: 'Mid', items: [{id:3285,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Veigar:     { role: 'Mid', items: [{id:6655,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Yone:       { role: 'Mid / Top', items: [{id:6673,n:'Immortal Shieldbow'},{id:3031,n:'Infinity Edge'},{id:6672,n:'Kraken Slayer'},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+
+    Darius:     { role: 'Top', items: [{id:6631,n:'Stridebreaker'},{id:3184,n:'Hullbreaker'},{id:3053,n:"Sterak's Gage"},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Garen:      { role: 'Top', items: [{id:6631,n:'Stridebreaker'},{id:3748,n:'Titanic Hydra'},{id:3053,n:"Sterak's Gage"},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Mordekaiser:{ role: 'Top', items: [{id:3068,n:'Sunfire Aegis'},{id:3742,n:"Dead Man's Plate"},{id:3053,n:"Sterak's Gage"},{id:3075,n:'Thornmail'},{id:3083,n:"Warmog's Armor"},{id:3047,n:'Plated Steelcaps'}] },
+    Malphite:   { role: 'Top / Support', items: [{id:3068,n:'Sunfire Aegis'},{id:3742,n:"Dead Man's Plate"},{id:3143,n:"Randuin's Omen"},{id:3075,n:'Thornmail'},{id:3083,n:"Warmog's Armor"},{id:3047,n:'Plated Steelcaps'}] },
+    Gwen:       { role: 'Top', items: [{id:6673,n:'Immortal Shieldbow'},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Renekton:   { role: 'Top', items: [{id:6631,n:'Stridebreaker'},{id:3071,n:'Black Cleaver'},{id:3053,n:"Sterak's Gage"},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Jax:        { role: 'Top / Jungle', items: [{id:3078,n:'Trinity Force'},{id:3748,n:'Titanic Hydra'},{id:3053,n:"Sterak's Gage"},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+    Camille:    { role: 'Top', items: [{id:3078,n:'Trinity Force'},{id:3748,n:'Titanic Hydra'},{id:6035,n:"Serylda's Grudge"},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+
+    Warwick:    { role: 'Jungle', items: [{id:6632,n:'Divine Sunderer'},{id:3053,n:"Sterak's Gage"},{id:3748,n:'Titanic Hydra'},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Vi:         { role: 'Jungle', items: [{id:3084,n:'Heartsteel'},{id:3748,n:'Titanic Hydra'},{id:3053,n:"Sterak's Gage"},{id:3075,n:'Thornmail'},{id:3742,n:"Dead Man's Plate"},{id:3047,n:'Plated Steelcaps'}] },
+    Amumu:      { role: 'Jungle / Support', items: [{id:3068,n:'Sunfire Aegis'},{id:3742,n:"Dead Man's Plate"},{id:3143,n:"Randuin's Omen"},{id:3075,n:'Thornmail'},{id:3053,n:"Sterak's Gage"},{id:3047,n:'Plated Steelcaps'}] },
+    Ekko:       { role: 'Jungle / Mid', items: [{id:4637,n:'Hextech Rocketbelt'},{id:4645,n:'Shadowflame'},{id:3157,n:"Zhonya's Hourglass"},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3020,n:"Sorcerer's Shoes"}] },
+    LeeSin:     { role: 'Jungle', items: [{id:6632,n:'Divine Sunderer'},{id:3071,n:'Black Cleaver'},{id:3053,n:"Sterak's Gage"},{id:6035,n:"Serylda's Grudge"},{id:3036,n:"Lord Dominik's"},{id:3047,n:'Plated Steelcaps'}] },
+    KhaZix:     { role: 'Jungle', items: [{id:6691,n:'Duskblade'},{id:6694,n:"Serpent's Fang"},{id:3814,n:'Edge of Night'},{id:6035,n:"Serylda's Grudge"},{id:3036,n:"Lord Dominik's"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Graves:     { role: 'Jungle', items: [{id:6691,n:'Duskblade'},{id:3814,n:'Edge of Night'},{id:6035,n:"Serylda's Grudge"},{id:3036,n:"Lord Dominik's"},{id:3026,n:'Guardian Angel'},{id:3047,n:'Plated Steelcaps'}] },
+    Hecarim:    { role: 'Jungle', items: [{id:3078,n:'Trinity Force'},{id:6631,n:'Stridebreaker'},{id:3053,n:"Sterak's Gage"},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Rammus:     { role: 'Jungle', items: [{id:3068,n:'Sunfire Aegis'},{id:3143,n:"Randuin's Omen"},{id:3742,n:"Dead Man's Plate"},{id:3075,n:'Thornmail'},{id:3083,n:"Warmog's Armor"},{id:3047,n:'Plated Steelcaps'}] },
+
+    Thresh:     { role: 'Support', items: [{id:3190,n:'Locket'},{id:3050,n:"Zeke's Convergence"},{id:3109,n:"Knight's Vow"},{id:3107,n:'Redemption'},{id:3047,n:'Plated Steelcaps'},{id:3026,n:'Guardian Angel'}] },
+    Nautilus:   { role: 'Support', items: [{id:2065,n:"Shurelya's Battlesong"},{id:3190,n:'Locket'},{id:3109,n:"Knight's Vow"},{id:3107,n:'Redemption'},{id:3047,n:'Plated Steelcaps'},{id:3075,n:'Thornmail'}] },
+    Lulu:       { role: 'Support', items: [{id:2065,n:"Shurelya's Battlesong"},{id:6617,n:'Moonstone Renewer'},{id:6616,n:'Staff of Flowing Water'},{id:3107,n:'Redemption'},{id:3109,n:"Knight's Vow"},{id:3020,n:"Sorcerer's Shoes"}] },
+    Janna:      { role: 'Support', items: [{id:2065,n:"Shurelya's Battlesong"},{id:3107,n:'Redemption'},{id:3109,n:"Knight's Vow"},{id:3190,n:'Locket'},{id:6616,n:'Staff of Flowing Water'},{id:3020,n:"Sorcerer's Shoes"}] },
+    Soraka:     { role: 'Support', items: [{id:6617,n:'Moonstone Renewer'},{id:3107,n:'Redemption'},{id:3109,n:"Knight's Vow"},{id:3190,n:'Locket'},{id:4401,n:'Chemtech Putrifier'},{id:3020,n:"Sorcerer's Shoes"}] },
+    Leona:      { role: 'Support', items: [{id:3190,n:'Locket'},{id:3109,n:"Knight's Vow"},{id:3050,n:"Zeke's Convergence"},{id:3107,n:'Redemption'},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Blitzcrank: { role: 'Support', items: [{id:3190,n:'Locket'},{id:3050,n:"Zeke's Convergence"},{id:3109,n:"Knight's Vow"},{id:3107,n:'Redemption'},{id:3075,n:'Thornmail'},{id:3047,n:'Plated Steelcaps'}] },
+    Brand:      { role: 'Support / Mid', items: [{id:6655,n:"Luden's Tempest"},{id:4645,n:'Shadowflame'},{id:3089,n:"Rabadon's Deathcap"},{id:3135,n:'Void Staff'},{id:3157,n:"Zhonya's Hourglass"},{id:3020,n:"Sorcerer's Shoes"}] },
+};
+
+const TIERLIST = {
+    S: [
+        'Jinx','Caitlyn','Jhin','Smolder','Xayah',
+        'Lux','Veigar','Annie','Ahri','Malzahar',
+        'Darius','Garen','Mordekaiser','Malphite','Cho\'Gath',
+        'Warwick','Vi','Amumu','Rammus','Volibear',
+        'Thresh','Nautilus','Lulu','Soraka','Milio'
+    ],
+    A: [
+        'Ashe','Sivir','Twitch','Draven','MissFortune',
+        'Gwen','Sett','Yorick','Trundle','Nasus',
+        'Zed','Viktor','Orianna','Syndra','Vex',
+        'Ekko','KhaZix','Graves','Hecarim','Nocturne',
+        'Janna','Karma','Blitzcrank','Leona','Pyke'
+    ],
+    B: [
+        'Lucian','Vayne','Ezreal','Kogmaw','Aphelios',
+        'Renekton','Camille','Jax','Fiora','Sett',
+        'Yasuo','Yone','Sylas','Katarina','LeeSin',
+        'JarvanIV','Sejuani','Nunu','Hecarim','Shyvana',
+        'Sona','Zyra','Brand','Bard','Lux'
+    ],
+    C: [
+        'Kalista','Nilah','Varus','Sivir','Urgot',
+        'Irelia','Akali','Quinn','Teemo','Kennen',
+        'TwistedFate','Leblanc','Qiyana','Taliyah','Corki',
+        'Kayn','Udyr','Shaco','Fiddlesticks','Evelynn',
+        'Zilean','Taric','Vel\'Koz','Xerath','Heimerdinger'
+    ],
+    D: [
+        'Ryze','Azir','Gangplank','Skarner','RekSai',
+        'Shen','Aatrox','Cassiopeia','Twisted Fate','Corki'
+    ]
+};
+
+const ITEM_STATS = {
+    6672: { stats: '40 AD • 20% AS • 20% Crit',        passive: 'Každý 3. útok způsobí +100 skutečného poškození' },
+    3085: { stats: '45% AS • 20% Crit • 7% MS',        passive: 'Šípy zasahují 2 blízké nepřátele' },
+    3031: { stats: '70 AD • 20% Crit',                  passive: '+35% poškození kritickým úderem' },
+    3094: { stats: '30% AS • 25% Crit • 7% MS',        passive: 'Nabitý útok má extra dosah a MS' },
+    3036: { stats: '30 AD • 20% Crit',                  passive: '35% penetrace Armoru' },
+    3072: { stats: '80 AD • 20% Crit • 20% ŽP Steal',  passive: 'Přebytečné ŽP tvoří štít' },
+    3026: { stats: '40 AD • 40 Armor',                  passive: 'Oživení po zabití s 50% HP (4s)' },
+    3033: { stats: '30 AD • 20% Crit',                  passive: '30% Armor Pen + Grievous Wounds' },
+    6671: { stats: '55 AD • 20% Crit • 15% AS',        passive: 'Aktiva: Dash + přidávání útoků' },
+    6673: { stats: '55 AD • 20% AS • 10% ŽP Steal',    passive: 'Štít při poklesu HP pod 30%' },
+    3153: { stats: '40 AD • 25% AS • 10% ŽP Steal',    passive: 'Aktiva: Odcizí 20% MS nepřítele' },
+    3046: { stats: '20% AS • 25% Crit • 7% MS',        passive: 'Štít při poklesu pod 30% HP' },
+    6655: { stats: '80 AP • 20 Magic Pen',              passive: 'Výbuch poškozující první zasaženého' },
+    4645: { stats: '100 AP • 12 Magic Pen',             passive: 'Bonus Pen vs štítů a nízkého HP' },
+    3089: { stats: '120 AP',                            passive: '+40% všeho AP které máš' },
+    3135: { stats: '65 AP',                             passive: '40% pronikání magické odolnosti' },
+    3157: { stats: '65 AP • 45 Armor',                  passive: 'Aktiva: Stasis — nesmrtelnost 2,5s' },
+    3020: { stats: '18 Magic Pen • 45 pohyb',           passive: 'Nutnost pro každého mága' },
+    6691: { stats: '60 AD • 18 Lethality',              passive: 'Po zabití: Neviditelnost na 1,5s' },
+    6694: { stats: '55 AD • 12 Lethality',              passive: 'Snižuje štíty protivníka o 50%' },
+    3814: { stats: '50 AD • 10 Lethality • 325 HP',    passive: 'Passivní Spell Shield (2s cooldown)' },
+    6035: { stats: '45 AD • 30% Armor Pen',             passive: 'Při poškození: Zpomalení cíle' },
+    3078: { stats: '33 AD • 33% AS • 200 HP • 30 MS',  passive: 'Spellblade: Bonus dmg po skill' },
+    6632: { stats: '40 AD • 20% AS • 400 HP',          passive: 'Spellblade + Armor redukce' },
+    6631: { stats: '50 AD • 20% AS • 300 HP',          passive: 'Aktiva: AoE Zpomalení okolí' },
+    3184: { stats: '60 AD • 400 HP',                    passive: 'Solo na laně: +Armor a věž dmg' },
+    3053: { stats: '50 AD • 400 HP',                    passive: 'Štít za 25% max HP po 3s souboje' },
+    3742: { stats: '50 Armor • 500 HP',                 passive: 'Pohyb buduje nabití → Slow na útok' },
+    3075: { stats: '80 Armor • 350 HP',                 passive: 'Grievous Wounds + vrací dmg útočníkovi' },
+    3047: { stats: '20 Armor',                          passive: '-8% poškození základními útoky' },
+    3748: { stats: '50 AD • 600 HP',                    passive: 'Splash poškození okolo sebe' },
+    3068: { stats: '350 HP • 50 Armor',                 passive: 'Aura: Spaluje blízké nepřátele' },
+    3143: { stats: '80 Armor • 300 HP',                 passive: 'Aktiva: AoE Zpomalení okolí' },
+    3083: { stats: '800 HP',                            passive: 'Mimo boj: Rychlá regenerace HP' },
+    3084: { stats: '800 HP',                            passive: 'Každý útok přidá +bonus max HP' },
+    3071: { stats: '40 AD • 400 HP',                    passive: 'Snižuje Armor cíle až o 24%' },
+    3190: { stats: '40 Armor • 400 HP',                 passive: 'Aktiva: AoE Štít pro blízké spojence' },
+    3050: { stats: '25 Armor • 250 HP',                 passive: 'Posílí vázaného spojence plameny' },
+    3109: { stats: '200 HP • 10 Armor',                 passive: 'Přesměruje 12% dmg od spojence' },
+    3107: { stats: '10% Heal Power',                    passive: 'Aktiva: AoE Léčení z nebe (oblouk)' },
+    2065: { stats: '200 HP',                            passive: 'Aktiva: AoE +60% MS na 4 sekundy' },
+    6617: { stats: '40 AP',                             passive: 'Léčí blízké spojence při asistech' },
+    6616: { stats: '40 AP',                             passive: 'Dá spojencům +25% AS nebo +25 AP' },
+    4401: { stats: '40 AP',                             passive: 'Grievous Wounds přes hojení' },
+    4637: { stats: '80 AP • 200 HP',                    passive: 'Aktiva: Dash + AoE Magic poškození' },
+    3285: { stats: '80 AP • 20 Magic Pen',              passive: 'Výbuch poškozující první zasaženého' },
+};
+
+const CHAMPION_ID_MAP = {
+    "Nunu & Willump": "Nunu",
+    "Wukong": "MonkeyKing",
+    "Dr. Mundo": "DrMundo",
+    "Bel'Veth": "Belveth",
+    "Kai'Sa": "Kaisa",
+    "Kha'Zix": "KhaZix",
+    "Rek'Sai": "RekSai",
+    "Vel'Koz": "VelKoz",
+    "Cho'Gath": "Chogath",
+    "Kog'Maw": "KogMaw",
+    "LeBlanc": "Leblanc",
+    "Miss Fortune": "MissFortune",
+    "Jarvan IV": "JarvanIV",
+    "Lee Sin": "LeeSin",
+    "Aurelion Sol": "AurelionSol",
+    "Master Yi": "MasterYi",
+    "Tahm Kench": "TahmKench",
+    "Twisted Fate": "TwistedFate",
+    "Xin Zhao": "XinZhao",
+    "Nunu": "Nunu",
+    "KhaZix": "Khazix",
+    "Kha'Zix": "Khazix"
+};
+
+function champIdFromName(name) {
+    if (CHAMPION_ID_MAP[name]) return CHAMPION_ID_MAP[name];
+    return name.replace(/[' .]/g, '');
+}
+
+function formatStats(statsStr) {
+    if (!statsStr) return '';
+    var parts = statsStr.split('•').map(function(s) { return s.trim(); }).filter(Boolean);
+    return parts.map(function(part) {
+        var icon = '', color = '#60a5fa';
+        if      (/\bAD\b/.test(part))           { icon = '⚔';  color = '#ff9000'; }
+        else if (/\bAP\b/.test(part))           { icon = '✦';  color = '#c084fc'; }
+        else if (/\bAS\b/.test(part))           { icon = '⚡'; color = '#fbbf24'; }
+        else if (/\bCrit\b/.test(part))         { icon = '◈';  color = '#ffd700'; }
+        else if (/\bArmor\b/.test(part))        { icon = '🛡'; color = '#a0aec0'; }
+        else if (/\bMR\b/.test(part))           { icon = '◆';  color = '#60a5fa'; }
+        else if (/\bHP\b/.test(part))           { icon = '♥';  color = '#f87171'; }
+        else if (/\bLethality\b/.test(part))    { icon = '🗡'; color = '#d1d5db'; }
+        else if (/\bMagic Pen\b/.test(part))    { icon = '↯';  color = '#a78bfa'; }
+        else if (/\bMS\b|\bpohyb\b/.test(part)) { icon = '➤'; color = '#22d3ee'; }
+        else if (/ŽP Steal/.test(part))         { icon = '🩸'; color = '#f472b6'; }
+        else if (/Heal Power/.test(part))        { icon = '✚';  color = '#4ade80'; }
+        return '<span class="stat-badge" style="color:' + color + '">' + icon + ' ' + part + '</span>';
+    }).join('');
+}
+
+function setTheme(theme, btn) {
+    var html = document.documentElement;
+    if (theme === 'purple') {
+        html.removeAttribute('data-theme');
+    } else {
+        html.setAttribute('data-theme', theme);
+    }
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function showSection(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    var navEl = document.getElementById('nav-' + id);
+    if (navEl) navEl.classList.add('active');
+    if (id === 'champions' && allChampions.length === 0) loadAllChampions();
+    return false;
+}
+
+function renderBuildsGrid(filter) {
+    var grid = document.getElementById('builds-champ-grid');
+    grid.innerHTML = '';
+    Object.keys(BUILDS).forEach(function(key) {
+        var b = BUILDS[key];
+        var role = b.role;
+        if (filter !== 'all') {
+            var match = role.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+            if (!match) return;
         }
-    </script>
+        var btn = document.createElement('button');
+        btn.className = 'build-champ-btn';
+        btn.setAttribute('data-key', key);
+        btn.onclick = function() { showBuild(key); };
+        var cid = champIdFromName(key);
+        btn.innerHTML = '<img src="https://ddragon.leagueoflegends.com/cdn/' + VER + '/img/champion/' + cid + '.png" alt="' + key + '" onerror="this.style.opacity=\'0.3\'"><span>' + key.replace(/([A-Z])/g, ' $1').trim() + '</span>';
+        grid.appendChild(btn);
+    });
+}
+
+function filterBuilds(role, btn) {
+    document.querySelectorAll('#builds-filter .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentBuildFilter = role;
+    document.getElementById('build-display').classList.remove('visible');
+    renderBuildsGrid(role);
+}
+
+function showBuild(key) {
+    var data = BUILDS[key];
+    if (!data) return;
+    document.querySelectorAll('.build-champ-btn').forEach(b => b.classList.remove('selected'));
+    var sel = document.querySelector('[data-key="' + key + '"]');
+    if (sel) sel.classList.add('selected');
+
+    var display = document.getElementById('build-display');
+    display.classList.add('visible');
+    document.getElementById('bd-name').innerText = key.replace(/([A-Z])/g, ' $1').trim();
+    document.getElementById('bd-role').innerText = '📍 Role: ' + data.role;
+
+    var itemsEl = document.getElementById('bd-items');
+    itemsEl.innerHTML = '';
+    data.items.forEach(function(item) {
+        var info = ITEM_STATS[item.id] || {};
+        var slot = document.createElement('div');
+        slot.className = 'item-slot';
+        slot.innerHTML =
+            '<img src="https://ddragon.leagueoflegends.com/cdn/' + VER + '/img/item/' + item.id + '.png" alt="' + item.n + '" onerror="this.style.opacity=\'0.3\'">' +
+            '<div class="item-name">' + item.n + '</div>' +
+            (info.stats   ? '<div class="item-stats">'   + formatStats(info.stats) + '</div>' : '') +
+            (info.passive ? '<div class="item-passive">' + info.passive              + '</div>' : '');
+        itemsEl.appendChild(slot);
+    });
+}
+
+function filterByClass(cls, btn) {
+    document.querySelectorAll('#class-filter .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentClassFilter = cls;
+    renderChampions();
+}
+
+function filterChampions() {
+    renderChampions();
+}
+
+function renderChampions() {
+    var grid = document.getElementById('all-champs-grid');
+    var search = document.getElementById('champ-search').value.toLowerCase();
+    grid.innerHTML = '';
+
+    var filtered = allChampions.filter(function(c) {
+        var nameMatch = c.name.toLowerCase().indexOf(search) !== -1;
+        var classMatch = currentClassFilter === 'all' || c.tags.indexOf(currentClassFilter) !== -1;
+        return nameMatch && classMatch;
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="color:var(--text-dim);padding:20px;">Žádný šampion nenalezen.</div>';
+        return;
+    }
+
+    filtered.forEach(function(c) {
+        var card = document.createElement('div');
+        card.className = 'champ-card';
+        card.innerHTML = '<img src="https://ddragon.leagueoflegends.com/cdn/' + VER + '/img/champion/' + c.id + '.png" alt="' + c.name + '"><span>' + c.name + '</span>';
+        grid.appendChild(card);
+    });
+}
+
+async function loadAllChampions() {
+    var grid = document.getElementById('all-champs-grid');
+    try {
+        var res = await fetch('https://ddragon.leagueoflegends.com/cdn/' + VER + '/data/en_US/champion.json');
+        var data = await res.json();
+        allChampions = Object.values(data.data).sort(function(a,b) {
+            return a.name.localeCompare(b.name);
+        });
+        renderChampions();
+    } catch(e) {
+        grid.innerHTML = '<div style="color:var(--text-dim);padding:20px;">Nepodařilo se načíst šampiony.</div>';
+    }
+}
+
+function renderTierList() {
+    var container = document.getElementById('tier-rows');
+    var tierColors = { S:'#e040fb', A:'#60a5fa', B:'#4ade80', C:'#fbbf24', D:'#f87171' };
+    ['S','A','B','C','D'].forEach(function(tier) {
+        var row = document.createElement('div');
+        row.className = 'tier-row tier-' + tier;
+
+        var label = document.createElement('div');
+        label.className = 'tier-label';
+        label.innerText = tier;
+
+        var champs = document.createElement('div');
+        champs.className = 'tier-champs';
+
+        TIERLIST[tier].forEach(function(name) {
+            var cid = champIdFromName(name);
+            var card = document.createElement('div');
+            card.className = 'tier-champ';
+            var displayName = name.replace(/([A-Z])/g, ' $1').trim().replace(/^./, s => s.toUpperCase());
+            card.innerHTML = '<img src="https://ddragon.leagueoflegends.com/cdn/' + VER + '/img/champion/' + cid + '.png" alt="' + displayName + '" onerror="this.style.opacity=\'0.2\'"><span>' + displayName + '</span>';
+            champs.appendChild(card);
+        });
+
+        row.appendChild(label);
+        row.appendChild(champs);
+        container.appendChild(row);
+    });
+}
+
+function buildItemNameMap() {
+    var map = {};
+    Object.values(BUILDS).forEach(function(b) {
+        b.items.forEach(function(item) {
+            map[item.n.toLowerCase()] = item.id;
+        });
+    });
+    return map;
+}
+
+function parseItemsFromText(text) {
+    var nameMap = buildItemNameMap();
+    var lower = text.toLowerCase();
+    var found = [];
+    var foundIds = {};
+    var sorted = Object.keys(nameMap).sort(function(a,b) { return b.length - a.length; });
+    sorted.forEach(function(name) {
+        if (lower.indexOf(name) !== -1 && !foundIds[nameMap[name]]) {
+            found.push({ id: nameMap[name], name: name });
+            foundIds[nameMap[name]] = true;
+        }
+    });
+    return found.slice(0, 6);
+}
+
+function renderAISlots(items) {
+    var slots = document.querySelectorAll('#ai-slots .ai-slot');
+    var hint = document.querySelector('.ai-slots-hint');
+
+    slots.forEach(function(slot, i) {
+        if (items[i]) {
+            var item = items[i];
+            var info = ITEM_STATS[item.id] || {};
+            var displayName = Object.values(BUILDS).reduce(function(found, b) {
+                if (found) return found;
+                var match = b.items.find(function(it) { return it.id === item.id; });
+                return match ? match.n : null;
+            }, null) || item.name;
+
+            slot.className = 'ai-slot filled';
+            slot.innerHTML =
+                '<img src="https://ddragon.leagueoflegends.com/cdn/' + VER + '/img/item/' + item.id + '.png" alt="' + displayName + '" onerror="this.style.opacity=\'0.3\'">' +
+                '<div class="slot-item-name">' + displayName + '</div>' +
+                '<div class="slot-tooltip">' +
+                    '<strong>' + displayName + '</strong>' +
+                    (info.stats   ? '<br><span style="color:#60a5fa">' + info.stats + '</span>' : '') +
+                    (info.passive ? '<br><em style="color:#8b7cb3">' + info.passive + '</em>' : '') +
+                '</div>';
+        } else {
+            slot.className = 'ai-slot empty';
+            slot.innerHTML = '<span class="slot-num">' + (i + 1) + '</span>';
+        }
+    });
+
+    if (hint) {
+        if (items.length > 0) {
+            hint.className = 'ai-slots-hint hidden';
+        } else {
+            hint.className = 'ai-slots-hint';
+        }
+    }
+}
+
+async function askAI() {
+    var vstup = document.getElementById('prompt').value;
+    var vysledek = document.getElementById('result');
+    if (!vstup.trim()) {
+        vysledek.className = 'visible';
+        vysledek.innerText = 'Napiš nejdřív, co hraješ!';
+        return;
+    }
+    vysledek.className = 'visible';
+    vysledek.innerHTML = '<span class="loading">AI analyzuje tvůj build...</span>';
+    renderAISlots([]);
+    try {
+        var odpoved = await fetch('/ai', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prompt: vstup})
+        });
+        var data = await odpoved.json();
+        var text = data.odpoved || data.chyba || '';
+        vysledek.innerText = text;
+        var items = parseItemsFromText(text);
+        renderAISlots(items);
+    } catch(e) {
+        vysledek.innerText = 'Chyba při spojení se serverem.';
+    }
+}
+
+document.getElementById('prompt').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') askAI();
+});
+
+renderBuildsGrid('all');
+renderTierList();
+</script>
+
 </body>
 </html>
